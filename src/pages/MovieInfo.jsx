@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import Banner from '../components/partials/Banner';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -11,11 +11,18 @@ import CrauselContainer from '../components/common/CrauselContainer';
 
 const MovieInfo = () => {
     const { id } = useParams();
-    const navigate = useNavigate()
     const apiKey = import.meta.env.VITE_API_KEY
     const dispatch = useDispatch()
     const movieInfo = useSelector(state => state.movieByIdReducer)
     const castingInfo = useSelector(state=>state.movieCastingReducer)
+    const [randomVideoLink, setRandomVideoLink] = useState()
+    const randomTrailer = [
+        "27aEM6q1Wqs?si=bhrDlhBfSvudQnsb",
+        "4A_kmjtsJ7c?si=a5MglKwn-z_1PbIB",
+        "njPNg0A9VpY?si=J0UfW-2-IcetzHpy",
+        "clgyncrbyDg?si=CkdE_7bSKbcMC7Uz",
+        "VWqJifMMgZE?si=vWzAJVDRDpUPOmbE",
+    ]
     const getInfo = async () => {
         const movieByIdInfo = await axiosInstance.get(`/movie/${id}?api_key=${apiKey}`)
         dispatch(movieById(movieByIdInfo.data));
@@ -24,9 +31,14 @@ const MovieInfo = () => {
         const castList = await axiosInstance.get(`movie/${id}/credits?api_key=${apiKey}`)
         dispatch(movieCasting(castList.data))
     }
+    const setLink = () =>{
+        const randomIndex = Math.floor(Math.random()*randomTrailer.length);
+        setRandomVideoLink(randomTrailer[randomIndex]);
+    }
     useEffect(() => {
         getInfo(),
-        getCastList()
+        getCastList(),
+        setLink()
     }, [])
     return (
         <>
@@ -50,7 +62,7 @@ const MovieInfo = () => {
                             OverView
                         </div>
                         <div>
-                        <button onClick={()=>window.open("https://www.youtube.com/watch?v=6YnryDjEGr8")} class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded">
+                        <button class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent rounded">
                             Watch Now 
                         </button>
                         </div>
@@ -59,16 +71,6 @@ const MovieInfo = () => {
                         </div>
                         </div>
                         {movieInfo.duration}
-                        <div className='flex justify-between pt-10'>
-                            <div>
-                            <div>Director</div>
-                            <div> </div>
-                            </div>
-                            <div>
-                            <div>Screenplay</div>
-                            <div></div>
-                            </div>
-                        </div>
                     </div>
                 </div>
                     <Banner src={`${movieInfo.backdrop_path}`} />
@@ -89,6 +91,9 @@ const MovieInfo = () => {
                     }):<div></div>
                 }
             </CrauselContainer>
+            <div className='w-[100] flex justify-center mt-10'>
+            <iframe className="w-[80vw] h-[70vh] " src={`https://www.youtube.com/embed/${randomVideoLink}`}></iframe>
+            </div>
         </>
     )
 }
